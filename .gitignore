@@ -586,3 +586,5 @@ test/testFixture/linkml.bak/yaml_validate_clean.yaml
 test/testFixture/linkml.bak/yaml_validate_invalid.yaml
 test/testFixture/linkml.bak/yaml1.yaml
 test/testFixture/linkml.bak/yaml2.yaml
+schemas/linkml-meta.schema.json
+run-test-log.txt
