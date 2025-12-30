@@ -11,5 +11,8 @@
     "other": true,
     "comments": true,
     "strings": true
-  }
+  },
+  "yaml.dialect.linkml": true,
+  "yaml.schemas": {},
+  "yaml.schemaStore.enable": true
 }

@@ -223,6 +223,9 @@ My_second_project:
 You must then associate schemas relative to the root of the multi root workspace project.
 
 ```json
+You must then associate schemas relative to the root of the multi root workspace project.
+
+```json
 yaml.schemas: {
     "My_first_project/my_schema.json": "test.yaml",
     "My_second_project/my_schema2.json": "test2.yaml"
@@ -231,10 +234,45 @@ yaml.schemas: {
 
 `yaml.schemas` allows you to specify JSON schemas that you want to validate against the YAML you write. *Kubernetes* is a reserved keyword field. It does not require a URL, as the language server will provide that. You need the keyword `kubernetes` and a glob pattern.
 
+### Specialized Dialects (Example: LinkML)
+
+The Red Hat YAML extension can be extended to support specialized YAML dialects. As an example, **LinkML** support is included as an optional dialect that provides both specialized **syntax highlighting** and **schema validation**.
+
+#### Step 1: Bootstrap LinkML meta-schema (Optional)
+
+If you are working with LinkML models, you can bootstrap the required meta-schema using this script:
+
+```bash
+# Create local folder for schemas
+mkdir -p schemas
+
+# Download official LinkML meta-schema
+curl -L https://w3id.org/linkml/meta.schema.json -o schemas/linkml-meta.schema.json
+```
+
+#### Step 2: Enable Dialect and Highlighting
+
+To enable specialized features without the "baggage" of specific file extensions:
+
+1.  **Enable Validation**: Add the following to your `.vscode/settings.json`:
+    ```json
+    {
+      "yaml.dialect.linkml": true,
+      "yaml.schemas": {
+        "./schemas/linkml-meta.schema.json": ["*.yaml"]
+      }
+    }
+    ```
+2.  **Enable Highlighting**: For any `.yaml` file, you can switch the language mode from `YAML` to `LinkML` (using the language picker in the status bar or via `files.associations` in settings). This activates the specialized LinkML TextMate grammar.
+
+---
+
 ### Mapping a schema in an extension
 
-- Supports `yamlValidation` point, which allows you to contribute a schema for a specific type of YAML file (Similar to [jsonValidation](https://code.visualstudio.com/docs/extensionAPI/extension-points#_contributesjsonvalidation))
+* Supports `yamlValidation` point, which allows you to contribute a schema for a specific type of YAML file (Similar to [jsonValidation](https://code.visualstudio.com/docs/extensionAPI/extension-points#_contributesjsonvalidation))
+
 e.g.
+
 ```JSON
 {
   "contributes": {

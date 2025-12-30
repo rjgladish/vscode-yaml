@@ -45,7 +45,8 @@
     "onLanguage:yaml-textmate",
     "onLanguage:yaml-tmlanguage",
     "onLanguage:ansible",
-    "onLanguage:ansible-jinja"
+    "onLanguage:ansible-jinja",
+    "onView:google.code.assist.welcome"
   ],
   "keywords": [
     "kubernetes",
@@ -85,8 +86,38 @@
         "path": "./syntaxes/yaml.tmLanguage.json"
       }
     ],
+    "viewsContainers": {
+      "sidebar": [
+        {
+          "id": "gemini-code-assist",
+          "title": "Gemini Code Assist",
+          "icon": "icon/icon128.png"
+        }
+      ]
+    },
+    "views": {
+      "gemini-code-assist": [
+        {
+          "id": "google.code.assist.welcome",
+          "name": "Google Code Assist",
+          "when": "google.code.assist.showWelcome"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "google.code.assist.welcome",
+        "contents": "Welcome to Google Code Assist. [Learn more](https://cloud.google.com/code/docs/vscode/code-assist)."
+      }
+    ],
+    "commands": [
+      {
+        "command": "google.code.assist.welcome",
+        "title": "Google Code Assist: Welcome"
+      }
+    ],
     "configuration": {
-      "title:": "YAML",
+      "title": "YAML",
       "properties": {
         "redhat.telemetry.enabled": {
           "type": "boolean",

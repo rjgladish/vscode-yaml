@@ -220,7 +220,6 @@ export function startClient(
       client.onNotification(SchemaSelectionRequests.schemaStoreInitialized, () => {
         createJSONSchemaStatusBarItem(context, client);
       });
-
       initializeRecommendation(context);
     })
     .catch((err) => {

@@ -1,0 +1,209 @@
+
+> vscode-yaml@1.20.0 test
+> npm run test-compile && sh scripts/e2e.sh
+
+
+> vscode-yaml@1.20.0 test-compile
+> npm run clean && npm run fetch-schemas && tsc -p ./ && webpack --mode development && npm run copy-l10n
+
+
+> vscode-yaml@1.20.0 clean
+> rimraf out && rimraf dist && rimraf schemas/linkml-meta.schema.json
+
+
+> vscode-yaml@1.20.0 fetch-schemas
+> mkdir -p schemas && curl -L -o schemas/linkml-meta.schema.json https://w3id.org/linkml/meta.schema.json
+
+asset languageserver.js 2.98 MiB [emitted] (name: languageserver) 1 related asset
+asset extension.js 1.9 MiB [emitted] (name: extension) 1 related asset
+runtime modules 1.69 KiB 8 modules
+orphan modules 185 bytes [orphan] 4 modules
+modules by path ./node_modules/ 4.29 MiB
+  javascript modules 4.03 MiB
+    cacheable modules 4.03 MiB 640 modules
+    + 2 modules
+  json modules 267 KiB 8 modules
+modules by path ./src/ 49.4 KiB
+  modules by path ./src/*.ts 42.1 KiB 8 modules
+  modules by path ./src/recommendation/*.ts 5.1 KiB
+    ./src/recommendation/index.ts 766 bytes [built] [code generated]
+    + 2 modules
+  ./src/node/yamlClientMain.ts 2.14 KiB [built] [code generated]
++ 23 modules
+
+WARNING in ./node_modules/vscode-languageserver/node_modules/vscode-languageserver-types/lib/umd/main.js 3:24-31
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+ @ ./node_modules/vscode-languageserver/node_modules/vscode-languageserver-protocol/lib/common/api.js 23:13-51
+ @ ./node_modules/vscode-languageserver/node_modules/vscode-languageserver-protocol/lib/node/main.js 24:13-37
+ @ ./node_modules/vscode-languageserver/lib/common/api.js 25:13-55
+ @ ./node_modules/vscode-languageserver/lib/node/main.js 29:13-37
+ @ ./node_modules/yaml-language-server/out/server/src/yamlSettings.js 4:32-64
+ @ ./node_modules/yaml-language-server/out/server/src/server.js 12:23-48
+
+1 warning has detailed information that is not shown.
+Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+
+webpack 5.100.1 compiled with 1 warning in 4024 ms
+
+asset extension-web.js 1.22 MiB [emitted] [big] (name: extension-web) 1 related asset
+runtime modules 921 bytes 5 modules
+orphan modules 185 bytes [orphan] 4 modules
+modules by path ./node_modules/ 1.03 MiB
+  javascript modules 1.03 MiB 233 modules
+  json modules 2.21 KiB
+    ./node_modules/@redhat-developer/vscode-redhat-telemetry/lib/config/telemet...(truncated) 543 bytes [built] [code generated]
+    ./node_modules/@redhat-developer/vscode-redhat-telemetry/package.json 1.68 KiB [built] [code generated]
+modules by path ./src/ 45.9 KiB
+  modules by path ./src/*.ts 39.1 KiB 7 modules
+  modules by path ./src/recommendation/*.ts 5.1 KiB
+    ./src/recommendation/index.ts 766 bytes [built] [code generated]
+    + 2 modules
+  ./src/webworker/yamlClientMain.ts 1.66 KiB [built] [code generated]
+external "vscode" 42 bytes [built] [code generated]
+fs (ignored) 15 bytes [built] [code generated]
+webpack 5.100.1 compiled successfully in 3658 ms
+
+asset languageserver-web.js 2.62 MiB [emitted] [big] (name: languageserver-web) 1 related asset
+runtime modules 1.25 KiB 6 modules
+javascript modules 2.24 MiB
+  modules by path ./node_modules/ 2.24 MiB 348 modules
+  fs (ignored) 15 bytes [built] [code generated]
+  ./build/polyfills/yamlFormatter.js 259 bytes [built] [code generated]
+  ./util.inspect (ignored) 15 bytes [built] [code generated]
+json modules 5.52 KiB
+  ./node_modules/yaml-language-server/node_modules/ajv/dist/refs/json-schema...(truncated) 2.72 KiB [built] [code generated]
+  ./node_modules/yaml-language-server/node_modules/ajv-draft-04/dist/refs/json-sch...(truncated) 2.45 KiB [built] [code generated]
+  ./node_modules/yaml-language-server/node_modules/ajv/dist/refs/data.json 360 bytes [built] [code generated]
+webpack 5.100.1 compiled successfully in 3415 ms
+
+> vscode-yaml@1.20.0 copy-l10n
+> cp -r node_modules/yaml-language-server/l10n dist/l10n
+
+[90m[main 2025-12-30T02:01:22.569Z][0m update#setState disabled
+[90m[main 2025-12-30T02:01:22.569Z][0m update#ctor - updates are disabled by the environment
+ChatSessionStore: Migrating 0 chat sessions from storage service to file system
+Started local extension host with pid 694956.
+Loading development extension at /home/randyg/repos/vscode-yaml
+MCP Registry configured: https://api.mcp.github.com
+Settings Sync: Account status changed from uninitialized to unavailable
+
+  Completion should work in multiple different scenarios
+    1) completion works with local schema
+    2) completion works with external schema
+    ✔ completion works with schema store schema (2059ms)
+    3) completion does not work with schema store disabled and no schemas set
+  JSON Schema Cache Tests
+    ✔ should clean up cache if there are no schema file
+    ✔ should check cache
+  Status bar should work in multiple different scenarios
+    ✔ Should create status bar item for JSON Schema
+    ✔ Should update status bar on editor change
+    ✔ Should inform if there are no schema
+    ✔ Should inform if there are more than one schema
+    ✔ Should show JSON Schema Store schema version
+    ✔ Should show JSON Schema Store schema version, dont include version
+  Tests for JSON Schema content provider
+    ✔ should handle "json-schema" url (2054ms)
+  Schema sections can be modified in memory
+    ✔ Modified schema gets correct results (2172ms)
+    ✔ Deleted schema gets correct results (2093ms)
+  Tests for schema provider feature
+    4) completion, hover, and validation work with registered contributor schema
+    ✔ Validation occurs automatically with registered contributor schema (4034ms)
+    5) Multiple contributors can match one file
+    ✔ Multiple contributors with one label matches (2028ms)
+    ✔ Multiple contributors with labels but only one label matches (2006ms)
+    ✔ Multiple contributors with labels but no label matches (2004ms)
+    6) Multiple contributors with one throwing an error
+  Telemetry Test
+    TelemetryOutputChannel
+      - should delegate "append" method
+      - should delegate "appendLine" method
+      - should delegate "clear" method
+      - should delegate "dispose" method
+      - should delegate "hide" method
+      - should delegate "show" method
+      - should send telemetry if log error in "append"
+      - should send telemetry if log error on "appendLine"
+      - shouldn't send telemetry if error should be skipped
+      - should throttle send telemetry if "append" called multiple times
+      - should throttle send telemetry if "appendLine" called multiple times
+    TelemetryErrorHandler
+      - should log telemetry on error
+  16 passing (31s)
+  12 pending
+  6 failing
+  1) Completion should work in multiple different scenarios
+       completion works with local schema:
+
+      AssertionError [ERR_ASSERTION]: Completion List doesn't have expected size
+      + expected - actual
+
+      -0
+      +1
+      
+  	at testCompletion (out/test/helper.js:66:12)
+  	at async Context.<anonymous> (out/test/completion.test.js:23:9)
+
+  2) Completion should work in multiple different scenarios
+       completion works with external schema:
+
+      AssertionError [ERR_ASSERTION]: Completion List doesn't have expected size
+      + expected - actual
+
+      -0
+      +1
+      
+  	at testCompletion (out/test/helper.js:66:12)
+  	at async Context.<anonymous> (out/test/completion.test.js:37:9)
+
+  3) Completion should work in multiple different scenarios
+       completion does not work with schema store disabled and no schemas set:
+
+      AssertionError [ERR_ASSERTION]: Completion List doesn't have expected size
+      + expected - actual
+
+      -65
+      +1
+      
+  	at testCompletion (out/test/helper.js:66:12)
+  	at async Context.<anonymous> (out/test/completion.test.js:54:9)
+
+  4) Tests for schema provider feature
+       completion, hover, and validation work with registered contributor schema:
+
+      AssertionError [ERR_ASSERTION]: Completion List doesn't have expected size
+      + expected - actual
+
+      -2
+      +1
+      
+  	at testCompletion (out/test/helper.js:66:12)
+  	at async Context.<anonymous> (out/test/schemaProvider.test.js:20:9)
+
+  5) Tests for schema provider feature
+       Multiple contributors can match one file:
+
+      AssertionError [ERR_ASSERTION]: Completion List doesn't have expected size
+      + expected - actual
+
+      -4
+      +2
+      
+  	at testCompletion (out/test/helper.js:66:12)
+  	at async Context.<anonymous> (out/test/schemaProvider.test.js:61:9)
+
+  6) Tests for schema provider feature
+       Multiple contributors with one throwing an error:
+
+      AssertionError [ERR_ASSERTION]: Completion List doesn't have expected size
+      + expected - actual
+
+      -6
+      +1
+      
+  	at testCompletion (out/test/helper.js:66:12)
+  	at async Context.<anonymous> (out/test/schemaProvider.test.js:131:9)
+
+[90m[main 2025-12-30T02:01:55.277Z][0m Extension host with pid 694956 exited with code: 0, signal: unknown.
+Exit code:   1
