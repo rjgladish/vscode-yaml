@@ -14,5 +14,6 @@
   },
   "yaml.dialect.linkml": true,
   "yaml.schemas": {},
-  "yaml.schemaStore.enable": true
+  "yaml.schemaStore.enable": true,
+  "yaml.disableAdditionalProperties": true
 }

@@ -1,0 +1,4 @@
+{
+  "yaml.dialect.linkml": true,
+  "yaml.disableAdditionalProperties": true
+}

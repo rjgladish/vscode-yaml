@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 'use strict';
 
-import { workspace, ExtensionContext, extensions, window, commands, Uri } from 'vscode';
+import { workspace, ExtensionContext, extensions, window, commands, Uri, ConfigurationTarget } from 'vscode';
 import {
   CommonLanguageClient,
   LanguageClientOptions,
@@ -112,7 +112,20 @@ export function startClient(
   runtime: RuntimeEnvironment
 ): SchemaExtensionAPI {
   const telemetryErrorHandler = new TelemetryErrorHandler(runtime.telemetry, lsName, 4);
+  console.log('YAML Extension: startClient called');
   const outputChannel = window.createOutputChannel(lsName);
+  logToExtensionOutputChannel('YAML Extension: startClient initializing');
+
+  workspace.onDidOpenTextDocument((doc) => {
+    logToExtensionOutputChannel(`Document opened: ${doc.uri.toString()}, languageId: ${doc.languageId}`);
+  });
+  window.onDidChangeActiveTextEditor((editor) => {
+    if (editor) {
+      logToExtensionOutputChannel(
+        `Active editor changed: ${editor.document.uri.toString()}, languageId: ${editor.document.languageId}`
+      );
+    }
+  });
   const l10nPath = context.asAbsolutePath('./dist/l10n');
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
@@ -125,6 +138,7 @@ export function startClient(
       { language: 'yaml-tmlanguage' },
       { language: 'ansible' },
       { language: 'ansible-jinja' },
+      { language: 'linkml' },
       { pattern: '**/*.{yaml,yml}' },
     ],
     synchronize: {
@@ -223,29 +237,54 @@ export function startClient(
       initializeRecommendation(context);
 
       const config = workspace.getConfiguration('yaml');
-      if (config.get('dialect.linkml')) {
-        const linkMLSchemaUri = Uri.file(context.asAbsolutePath('schemas/linkml-meta.schema.json')).toString();
-        const linkMLRequestContent = async (uri: string): Promise<string> => {
-          const content = await workspace.fs.readFile(Uri.parse(uri));
-          return new TextDecoder().decode(content);
-        };
+      const dialectLinkML = !!config.get('dialect.linkml');
 
-        const linkMLCheckTrigger = (uri: string): string | undefined => {
-          const document = workspace.textDocuments.find((d) => d.uri.toString() === uri);
-          if (document) {
-            const text = document.getText();
-            if (text.includes('id:') && (text.includes('classes:') || text.includes('slots:'))) {
-              return linkMLSchemaUri;
+      const linkMLSchemaUri = Uri.file(context.asAbsolutePath('dialect/linkml/schemas/linkml-meta.schema.json')).toString();
+      const linkMLRequestContent = async (uri: string): Promise<string> => {
+        const content = await workspace.fs.readFile(Uri.parse(uri));
+        return new TextDecoder().decode(content);
+      };
+
+      const linkMLCheckTrigger = (uri: string): string | undefined => {
+        const document = workspace.textDocuments.find((d) => d.uri.toString() === uri);
+        if (document) {
+          const text = document.getText();
+          // Precise regex for firstLine matching to check if we should suggest enabling dialect
+          const firstLine = text.split('\n')[0];
+          const isLinkMLFirstLine = /^\s*id:\s+(https?:\/\/|([a-zA-Z_][a-zA-Z0-9_\-.]*))/.test(firstLine);
+          const hasDefinition = /^(classes|slots|enums|types):/m.test(text);
+
+          if (isLinkMLFirstLine || (hasDefinition && text.includes('id:'))) {
+            if (!dialectLinkML) {
+              const showReminder = 'LinkML detected. Enable dialect and strict validation for better support?';
+              const enableAction = 'Enable LinkML Support';
+              window.showInformationMessage(showReminder, enableAction).then((selection) => {
+                if (selection === enableAction) {
+                  config.update('dialect.linkml', true, ConfigurationTarget.Global);
+                  config.update('disableAdditionalProperties', true, ConfigurationTarget.Global);
+                }
+              });
             }
           }
-          return undefined;
-        };
 
-        // Register automatic trigger based on id + (classes or slots)
+          if (dialectLinkML && (isLinkMLFirstLine || text.includes('id:')) && hasDefinition) {
+            logToExtensionOutputChannel(`LinkML Dialect: Detected LinkML schema for ${uri}`);
+            return linkMLSchemaUri;
+          }
+        }
+        return undefined;
+      };
+
+      if (dialectLinkML) {
+        // Register automatic trigger
         schemaExtensionAPI.registerContributor('linkml-auto', linkMLCheckTrigger, linkMLRequestContent);
-
-        // Register 'LinkML' keyword for manual association in settings.json
-        schemaExtensionAPI.registerContributor('LinkML', () => linkMLSchemaUri, linkMLRequestContent);
+      } else {
+        // Still register a passive trigger to detect and suggest enabling
+        workspace.onDidOpenTextDocument((doc) => {
+          if (doc.languageId === 'yaml' || doc.languageId === 'linkml') {
+            linkMLCheckTrigger(doc.uri.toString());
+          }
+        });
       }
     })
     .catch((err) => {

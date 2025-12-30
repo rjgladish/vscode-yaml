@@ -234,49 +234,29 @@ yaml.schemas: {
 
 `yaml.schemas` allows you to specify JSON schemas that you want to validate against the YAML you write. *Kubernetes* is a reserved keyword field. It does not require a URL, as the language server will provide that. You need the keyword `kubernetes` and a glob pattern.
 
-### Specialized Dialects (Example: LinkML)
+### Specialized Dialects
 
-The Red Hat YAML extension can be extended to support specialized YAML dialects. As an example, **LinkML** support is included as an optional dialect that provides specialized **syntax highlighting** and **automatic schema validation**.
+This extension supports specialized YAML dialects with custom syntax highlighting and schema validation.
 
-#### Step 1: Bootstrap LinkML meta-schema (Optional)
+#### LinkML
 
-If you are working with LinkML models, you can bootstrap the required meta-schema using this script:
+Files starting with `id:` followed by a URI or identifier are automatically detected as [LinkML](https://linkml.io/) schemas.
 
-```bash
-# Create local folder for schemas and download the meta-schema
-mkdir -p schemas && curl -L https://w3id.org/linkml/meta.schema.json -o schemas/linkml-meta.schema.json
-```
+See [dialect/linkml/README.md](dialect/linkml/README.md) for full documentation on:
 
-#### Step 2: Enable Dialect and Automatic Detection
-
-To enable specialized features:
-
-1. **Enable the Dialect**: Add the following to your `.vscode/settings.json`:
-   ```json
-   {
-     "yaml.dialect.linkml": true
-   }
-   ```
-2. **Automatic Detection**: When enabled, the extension automatically applies the LinkML schema to any YAML file that contains both an `id:` property and either a `classes:` or `slots:` property.
-3. **Manual Association**: If automatic detection isn't triggered, you can manually associate the LinkML schema:
-   ```json
-   {
-     "yaml.schemas": {
-       "LinkML": ["my-model.yaml"]
-     }
-   }
-   ```
-4. **Enable Highlighting**: Switch the language mode of any YAML file to **LinkML** (via the status bar or `files.associations` in settings) to activate specialized syntax highlighting.
+- Automatic detection patterns
+- Enabling schema validation
+- Manual file associations
 
 ---
 
 ### Mapping a schema in an extension
 
-* Supports `yamlValidation` point, which allows you to contribute a schema for a specific type of YAML file (Similar to [jsonValidation](https://code.visualstudio.com/docs/extensionAPI/extension-points#_contributesjsonvalidation))
+If you are developing a VS Code extension and want to contribute a schema for a specific type of YAML file, add the `yamlValidation` extension point to your **extension's `package.json`** (similar to [jsonValidation](https://code.visualstudio.com/docs/extensionAPI/extension-points#_contributesjsonvalidation)).
 
-e.g.
+Example:
 
-```JSON
+```json
 {
   "contributes": {
     "yamlValidation": [

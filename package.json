@@ -14,7 +14,7 @@
     }
   ],
   "license": "MIT",
-  "version": "1.20.0",
+  "version": "1.20.10",
   "publisher": "redhat",
   "bugs": "https://github.com/redhat-developer/vscode-yaml/issues",
   "repository": {
@@ -85,9 +85,9 @@
           "LinkML"
         ],
         "extensions": [
-          ".linkml.yaml",
-          ".linkml.yml"
+          ".yaml"
         ],
+        "firstLine": "^\\s*id:\\s+\\S.*",
         "configuration": "./language-configuration.json"
       }
     ],
@@ -100,7 +100,7 @@
       {
         "language": "linkml",
         "scopeName": "source.yaml.linkml",
-        "path": "./examples/linkml/syntaxes/linkml.tmLanguage.json"
+        "path": "./dialect/linkml/syntaxes/linkml.tmLanguage.json"
       }
     ],
     "viewsContainers": {
@@ -242,7 +242,7 @@
         "yaml.disableAdditionalProperties": {
           "type": "boolean",
           "default": false,
-          "description": "Globally set additionalProperties to false for all objects. So if its true, no extra properties are allowed inside yaml."
+          "markdownDescription": "Globally set additionalProperties to false for all objects. **Note: It is highly recommended to enable this when using the LinkML dialect to ensure strict validation of your models.**"
         },
         "yaml.disableDefaultProperties": {
           "type": "boolean",
@@ -280,7 +280,7 @@
         "yaml.keyOrdering": {
           "type": "boolean",
           "default": false,
-          "description": "Enforces alphabetical ordering of keys in mappings when set to true"
+          "markdownDescription": "Enforces alphabetical ordering of keys in mappings when set to true. **Note: For LinkML, it is recommended to keep this `false` if your `id:` property is expected to stay at the top of the file for automatic detection.**"
         },
         "yaml.extension.recommendations": {
           "type": "boolean",
@@ -290,7 +290,7 @@
         "yaml.dialect.linkml": {
           "type": "boolean",
           "default": false,
-          "description": "Enable LinkML dialect support (syntax highlighting and validation)."
+          "markdownDescription": "Enable LinkML dialect support (syntax highlighting and schema validation). **Note: Dialect is disabled by default. If enabled, it is also recommended to set `yaml.disableAdditionalProperties` to `true`.**"
         }
       }
     },
@@ -311,18 +311,19 @@
   "scripts": {
     "build": "npm run clean && npm run lint && npm run fetch-schemas && npm run vscode:prepublish",
     "check-dependencies": "node ./scripts/check-dependencies.js",
-    "clean": "rimraf out && rimraf dist && rimraf schemas/linkml-meta.schema.json",
+    "clean": "rimraf out && rimraf dist && rimraf dialect/linkml/schemas/linkml-meta.schema.json",
     "compile": "npm run fetch-schemas && webpack --mode none",
-    "fetch-schemas": "mkdir -p schemas && curl -L -o schemas/linkml-meta.schema.json https://w3id.org/linkml/meta.schema.json",
+    "fetch-schemas": "mkdir -p dialect/linkml/schemas && curl -L -o dialect/linkml/schemas/linkml-meta.schema.json https://w3id.org/linkml/meta.schema.json",
     "format": "prettier --write .",
     "lint": "eslint -c .eslintrc.js --ext .ts src test",
     "test": "npm run test-compile && sh scripts/e2e.sh",
     "ui-test": "npm run test-compile && extest setup-and-run out/test/ui-test/allTestsSuite.js -c 1.76.2",
-    "vscode:prepublish": "webpack --mode production && npm run copy-l10n",
+    "vscode:prepublish": "npm run fetch-schemas && webpack --mode production && npm run copy-l10n",
     "copy-l10n": "cp -r node_modules/yaml-language-server/l10n dist/l10n",
     "watch": "npm run fetch-schemas && webpack --mode development --watch --info-verbosity verbose",
     "test-compile": "npm run clean && npm run fetch-schemas && tsc -p ./ && webpack --mode development && npm run copy-l10n",
-    "run-in-chromium": "npm run compile && vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
+    "run-in-chromium": "npm run compile && vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
+    "vsix": "npm version patch --no-git-tag-version && npx @vscode/vsce package"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
