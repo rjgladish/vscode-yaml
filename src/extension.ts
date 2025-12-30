@@ -114,18 +114,6 @@ export function startClient(
   const telemetryErrorHandler = new TelemetryErrorHandler(runtime.telemetry, lsName, 4);
   console.log('YAML Extension: startClient called');
   const outputChannel = window.createOutputChannel(lsName);
-  logToExtensionOutputChannel('YAML Extension: startClient initializing');
-
-  workspace.onDidOpenTextDocument((doc) => {
-    logToExtensionOutputChannel(`Document opened: ${doc.uri.toString()}, languageId: ${doc.languageId}`);
-  });
-  window.onDidChangeActiveTextEditor((editor) => {
-    if (editor) {
-      logToExtensionOutputChannel(
-        `Active editor changed: ${editor.document.uri.toString()}, languageId: ${editor.document.languageId}`
-      );
-    }
-  });
   const l10nPath = context.asAbsolutePath('./dist/l10n');
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
@@ -249,12 +237,38 @@ export function startClient(
         const document = workspace.textDocuments.find((d) => d.uri.toString() === uri);
         if (document) {
           const text = document.getText();
-          // Precise regex for firstLine matching to check if we should suggest enabling dialect
-          const firstLine = text.split('\n')[0];
-          const isLinkMLFirstLine = /^\s*id:\s+(https?:\/\/|([a-zA-Z_][a-zA-Z0-9_\-.]*))/.test(firstLine);
-          const hasDefinition = /^(classes|slots|enums|types):/m.test(text);
+          // Precision detection: Find the first significant root-level key
+          const lines = text.split('\n');
+          let firstKey = '';
+          for (const line of lines) {
+            const trimmed = line.trim();
+            // Skip comments, blanks, and document separators
+            if (trimmed === '' || trimmed.startsWith('#') || trimmed === '---') {
+              continue;
+            }
+            // Check if this line is a root-level key (starts with a key name, not a list item)
+            const match = line.match(/^(\s*)([a-zA-Z0-9_\-.]+):/);
+            if (match) {
+              const keyName = match[2];
+              // Only consider it a schema if 'id:' is the first root-level key found
+              // (Indentation is allowed as long as it's consistent for a root block)
+              if (keyName === 'id') {
+                firstKey = 'id';
+              } else {
+                firstKey = keyName;
+              }
+              break;
+            }
+            // If we hit a list item or something else first, it's not a schema
+            if (trimmed.startsWith('-')) {
+              break;
+            }
+          }
 
-          if (isLinkMLFirstLine || (hasDefinition && text.includes('id:'))) {
+          const isLinkMLSignature = firstKey === 'id';
+          const hasDefinitions = /^classes:|^slots:|^enums:|^types:/m.test(text);
+
+          if (isLinkMLSignature) {
             if (!dialectLinkML) {
               const showReminder = 'LinkML detected. Enable dialect and strict validation for better support?';
               const enableAction = 'Enable LinkML Support';
@@ -267,7 +281,7 @@ export function startClient(
             }
           }
 
-          if (dialectLinkML && (isLinkMLFirstLine || text.includes('id:')) && hasDefinition) {
+          if (dialectLinkML && isLinkMLSignature && hasDefinitions) {
             logToExtensionOutputChannel(`LinkML Dialect: Detected LinkML schema for ${uri}`);
             return linkMLSchemaUri;
           }

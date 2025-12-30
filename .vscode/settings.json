@@ -14,6 +14,17 @@
   },
   "yaml.dialect.linkml": true,
   "yaml.schemas": {},
-  "yaml.schemaStore.enable": true,
-  "yaml.disableAdditionalProperties": true
+  "yaml.schemaStore.enable": false,
+  "yaml.disableAdditionalProperties": true,
+  "yaml.keyOrdering": false,
+  "[linkml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "editor.autoIndent": "keep"
+  }
 }

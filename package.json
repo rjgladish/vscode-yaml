@@ -14,7 +14,7 @@
     }
   ],
   "license": "MIT",
-  "version": "1.20.10",
+  "version": "1.20.15",
   "publisher": "redhat",
   "bugs": "https://github.com/redhat-developer/vscode-yaml/issues",
   "repository": {
@@ -24,7 +24,7 @@
   "icon": "icon/icon128.png",
   "engines": {
     "npm": ">=7.0.0",
-    "vscode": "^1.63.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Programming Languages",
@@ -39,15 +39,12 @@
     "virtualWorkspaces": true
   },
   "activationEvents": [
-    "onLanguage:yaml",
     "onLanguage:dockercompose",
     "onLanguage:github-actions-workflow",
     "onLanguage:yaml-textmate",
     "onLanguage:yaml-tmlanguage",
     "onLanguage:ansible",
-    "onLanguage:ansible-jinja",
-    "onLanguage:linkml",
-    "onView:google.code.assist.welcome"
+    "onLanguage:ansible-jinja"
   ],
   "keywords": [
     "kubernetes",
@@ -85,9 +82,10 @@
           "LinkML"
         ],
         "extensions": [
-          ".yaml"
+          ".yaml",
+          ".yml"
         ],
-        "firstLine": "^\\s*id:\\s+\\S.*",
+        "firstLine": "^(\\s*id:\\s+|---\\s*\\n\\s*id:\\s+)(https?:\\/\\/\\S+|[a-zA-Z_][a-zA-Z0-9_\\-\\.]*)",
         "configuration": "./language-configuration.json"
       }
     ],

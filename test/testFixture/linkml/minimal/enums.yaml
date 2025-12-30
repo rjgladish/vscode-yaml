@@ -1,0 +1,35 @@
+id: https://example.org/enums
+name: enums
+description: A test schema for enum inheritance.
+
+prefixes:
+  ex: https://example.org/
+
+default_prefix: ex
+
+enums:
+  BaseColors:
+    permissible_values:
+      RED:
+        description: "The color red"
+      GREEN:
+      BLUE:
+
+  ExtendedColors:
+    is_a: BaseColors
+    permissible_values:
+      YELLOW:
+      # override GREEN
+      GREEN:
+        description: "The color green, but more specific"
+
+  MixinColors:
+    mixin: true
+    permissible_values:
+      ORANGE:
+      PURPLE:
+
+  AllColors:
+    is_a: ExtendedColors
+    mixins:
+      - MixinColors
