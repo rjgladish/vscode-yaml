@@ -46,6 +46,7 @@
     "onLanguage:yaml-tmlanguage",
     "onLanguage:ansible",
     "onLanguage:ansible-jinja",
+    "onLanguage:linkml",
     "onView:google.code.assist.welcome"
   ],
   "keywords": [
@@ -77,6 +78,17 @@
         ],
         "firstLine": "^#cloud-config",
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "linkml",
+        "aliases": [
+          "LinkML"
+        ],
+        "extensions": [
+          ".linkml.yaml",
+          ".linkml.yml"
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -84,6 +96,11 @@
         "language": "yaml",
         "scopeName": "source.yaml",
         "path": "./syntaxes/yaml.tmLanguage.json"
+      },
+      {
+        "language": "linkml",
+        "scopeName": "source.yaml.linkml",
+        "path": "./examples/linkml/syntaxes/linkml.tmLanguage.json"
       }
     ],
     "viewsContainers": {
@@ -269,6 +286,11 @@
           "type": "boolean",
           "default": "true",
           "description": "Suggest additional extensions based on YAML usage."
+        },
+        "yaml.dialect.linkml": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable LinkML dialect support (syntax highlighting and validation)."
         }
       }
     },
@@ -287,18 +309,19 @@
   },
   "extensionDependencies": [],
   "scripts": {
-    "build": "npm run clean && npm run lint && npm run vscode:prepublish",
+    "build": "npm run clean && npm run lint && npm run fetch-schemas && npm run vscode:prepublish",
     "check-dependencies": "node ./scripts/check-dependencies.js",
-    "clean": "rimraf out && rimraf dist",
-    "compile": "webpack --mode none",
+    "clean": "rimraf out && rimraf dist && rimraf schemas/linkml-meta.schema.json",
+    "compile": "npm run fetch-schemas && webpack --mode none",
+    "fetch-schemas": "mkdir -p schemas && curl -L -o schemas/linkml-meta.schema.json https://w3id.org/linkml/meta.schema.json",
     "format": "prettier --write .",
     "lint": "eslint -c .eslintrc.js --ext .ts src test",
     "test": "npm run test-compile && sh scripts/e2e.sh",
     "ui-test": "npm run test-compile && extest setup-and-run out/test/ui-test/allTestsSuite.js -c 1.76.2",
     "vscode:prepublish": "webpack --mode production && npm run copy-l10n",
     "copy-l10n": "cp -r node_modules/yaml-language-server/l10n dist/l10n",
-    "watch": "webpack --mode development --watch --info-verbosity verbose",
-    "test-compile": "npm run clean && tsc -p ./ && webpack --mode development && npm run copy-l10n",
+    "watch": "npm run fetch-schemas && webpack --mode development --watch --info-verbosity verbose",
+    "test-compile": "npm run clean && npm run fetch-schemas && tsc -p ./ && webpack --mode development && npm run copy-l10n",
     "run-in-chromium": "npm run compile && vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
   },
   "devDependencies": {

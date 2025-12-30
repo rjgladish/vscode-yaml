@@ -221,6 +221,32 @@ export function startClient(
         createJSONSchemaStatusBarItem(context, client);
       });
       initializeRecommendation(context);
+
+      const config = workspace.getConfiguration('yaml');
+      if (config.get('dialect.linkml')) {
+        const linkMLSchemaUri = Uri.file(context.asAbsolutePath('schemas/linkml-meta.schema.json')).toString();
+        const linkMLRequestContent = async (uri: string): Promise<string> => {
+          const content = await workspace.fs.readFile(Uri.parse(uri));
+          return new TextDecoder().decode(content);
+        };
+
+        const linkMLCheckTrigger = (uri: string): string | undefined => {
+          const document = workspace.textDocuments.find((d) => d.uri.toString() === uri);
+          if (document) {
+            const text = document.getText();
+            if (text.includes('id:') && (text.includes('classes:') || text.includes('slots:'))) {
+              return linkMLSchemaUri;
+            }
+          }
+          return undefined;
+        };
+
+        // Register automatic trigger based on id + (classes or slots)
+        schemaExtensionAPI.registerContributor('linkml-auto', linkMLCheckTrigger, linkMLRequestContent);
+
+        // Register 'LinkML' keyword for manual association in settings.json
+        schemaExtensionAPI.registerContributor('LinkML', () => linkMLSchemaUri, linkMLRequestContent);
+      }
     })
     .catch((err) => {
       sendStartupTelemetryEvent(runtime.telemetry, false, err);

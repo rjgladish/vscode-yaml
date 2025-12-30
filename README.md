@@ -236,34 +236,37 @@ yaml.schemas: {
 
 ### Specialized Dialects (Example: LinkML)
 
-The Red Hat YAML extension can be extended to support specialized YAML dialects. As an example, **LinkML** support is included as an optional dialect that provides both specialized **syntax highlighting** and **schema validation**.
+The Red Hat YAML extension can be extended to support specialized YAML dialects. As an example, **LinkML** support is included as an optional dialect that provides specialized **syntax highlighting** and **automatic schema validation**.
 
 #### Step 1: Bootstrap LinkML meta-schema (Optional)
 
 If you are working with LinkML models, you can bootstrap the required meta-schema using this script:
 
 ```bash
-# Create local folder for schemas
-mkdir -p schemas
-
-# Download official LinkML meta-schema
-curl -L https://w3id.org/linkml/meta.schema.json -o schemas/linkml-meta.schema.json
+# Create local folder for schemas and download the meta-schema
+mkdir -p schemas && curl -L https://w3id.org/linkml/meta.schema.json -o schemas/linkml-meta.schema.json
 ```
 
-#### Step 2: Enable Dialect and Highlighting
+#### Step 2: Enable Dialect and Automatic Detection
 
-To enable specialized features without the "baggage" of specific file extensions:
+To enable specialized features:
 
-1.  **Enable Validation**: Add the following to your `.vscode/settings.json`:
-    ```json
-    {
-      "yaml.dialect.linkml": true,
-      "yaml.schemas": {
-        "./schemas/linkml-meta.schema.json": ["*.yaml"]
-      }
-    }
-    ```
-2.  **Enable Highlighting**: For any `.yaml` file, you can switch the language mode from `YAML` to `LinkML` (using the language picker in the status bar or via `files.associations` in settings). This activates the specialized LinkML TextMate grammar.
+1. **Enable the Dialect**: Add the following to your `.vscode/settings.json`:
+   ```json
+   {
+     "yaml.dialect.linkml": true
+   }
+   ```
+2. **Automatic Detection**: When enabled, the extension automatically applies the LinkML schema to any YAML file that contains both an `id:` property and either a `classes:` or `slots:` property.
+3. **Manual Association**: If automatic detection isn't triggered, you can manually associate the LinkML schema:
+   ```json
+   {
+     "yaml.schemas": {
+       "LinkML": ["my-model.yaml"]
+     }
+   }
+   ```
+4. **Enable Highlighting**: Switch the language mode of any YAML file to **LinkML** (via the status bar or `files.associations` in settings) to activate specialized syntax highlighting.
 
 ---
 
