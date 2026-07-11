@@ -19,7 +19,6 @@ import { joinPath } from './paths';
 import { getJsonSchemaContent, IJSONSchemaCache, JSONSchemaDocumentContentProvider } from './json-schema-content-provider';
 import { getConflictingExtensions, showUninstallConflictsNotification } from './extensionConflicts';
 import { TelemetryErrorHandler, TelemetryOutputChannel } from './telemetry';
-import { TextDecoder } from 'util';
 import { createJSONSchemaStatusBarItem } from './schema-status-bar-item';
 import { initializeRecommendation } from './recommendation';
 
@@ -67,6 +66,8 @@ namespace FSReadFile {
   // eslint-disable-next-line @typescript-eslint/ban-types
   export const type: RequestType<string, string, {}> = new RequestType('fs/readFile');
 }
+
+export const FSReadUriType: RequestType<string, string, unknown> = new RequestType('fs/readUri');
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace DynamicCustomSchemaRequestRegistration {
@@ -138,18 +139,22 @@ export function startClient(
     // Register the server for on disk and newly created YAML documents
     documentSelector: [
       { language: 'yaml' },
-      { language: 'dockercompose' },
-      { language: 'github-actions-workflow' },
       { language: 'yaml-textmate' },
       { language: 'yaml-tmlanguage' },
       { language: 'ansible' },
       { language: 'ansible-jinja' },
       { language: 'linkml' },
+      { language: 'azure-pipelines' },
+      { language: 'dockercompose' },
+      { language: 'github-actions-workflow' },
+      { language: 'home-assistant' },
+      { language: 'manifest-yaml' },
+      { language: 'spring-boot-properties-yaml' },
       { pattern: '**/*.{yaml,yml}' },
     ],
     synchronize: {
       // Notify the server about file changes to YAML and JSON files contained in the workspace
-      fileEvents: [workspace.createFileSystemWatcher('**/*.?(e)y?(a)ml'), workspace.createFileSystemWatcher('**/*.json')],
+      fileEvents: [workspace.createFileSystemWatcher('{**/*.json,**/*.yaml,**/*.eyaml,**/*.yml}')],
     },
     revealOutputChannelOn: RevealOutputChannelOn.Never,
     errorHandler: telemetryErrorHandler,
@@ -210,8 +215,24 @@ export function startClient(
       client.onRequest(VSCodeContentRequest.type, (uri: string) => {
         return getJsonSchemaContent(uri, runtime.schemaCache);
       });
-      client.onRequest(FSReadFile.type, (fsPath: string) => {
-        return workspace.fs.readFile(Uri.file(fsPath)).then((uint8array) => new TextDecoder().decode(uint8array));
+      client.onRequest(FSReadFile.type, async (fsPath: string) => {
+        try {
+          const uint8array = await workspace.fs.readFile(Uri.file(fsPath));
+          return new TextDecoder().decode(uint8array);
+        } catch {
+          const workspaceFolderBasedPath = workspace.workspaceFolders[0].uri.with({ path: fsPath });
+          const uint8array = await workspace.fs.readFile(workspaceFolderBasedPath);
+          return new TextDecoder().decode(uint8array);
+        }
+      });
+      client.onRequest(FSReadUriType, async (uri: string) => {
+        try {
+          const parsedUri = Uri.parse(uri);
+          const uint8array = await workspace.fs.readFile(parsedUri);
+          return new TextDecoder().decode(uint8array);
+        } catch (e) {
+          window.showErrorMessage(`Error while retrieving content of '${uri}': ${e}`);
+        }
       });
 
       sendStartupTelemetryEvent(runtime.telemetry, true);
