@@ -223,9 +223,6 @@ My_second_project:
 You must then associate schemas relative to the root of the multi root workspace project.
 
 ```json
-You must then associate schemas relative to the root of the multi root workspace project.
-
-```json
 yaml.schemas: {
     "My_first_project/my_schema.json": "test.yaml",
     "My_second_project/my_schema2.json": "test2.yaml"
@@ -242,8 +239,9 @@ This extension supports specialized YAML dialects with custom syntax highlightin
 
 Files starting with `id:` followed by a URI or identifier are automatically detected as [LinkML](https://linkml.io/) schemas.
 
-See [dialect/linkml/README.md](dialect/linkml/README.md) for full documentation on:
+See [dialect/linkml/README.md](dialect/linkml/README.md) for installation and configuration instructions:
 
+- Installing a local VSIX with the VS Code CLI
 - Automatic detection patterns
 - Enabling schema validation
 - Manual file associations

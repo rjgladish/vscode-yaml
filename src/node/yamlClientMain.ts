@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, window } from 'vscode';
+import { ExtensionContext } from 'vscode';
 import { startClient, LanguageClientConstructor, RuntimeEnvironment } from '../extension';
 import { ServerOptions, TransportKind, LanguageClientOptions, LanguageClient } from 'vscode-languageclient/node';
 
@@ -14,9 +14,7 @@ import { JSONSchemaCache } from '../json-schema-cache';
 
 // this method is called when vs code is activated
 export async function activate(context: ExtensionContext): Promise<SchemaExtensionAPI> {
-  window.showInformationMessage('YAML Extension (LinkML-Ready) is Activating...');
-  console.log('YAML Extension (Node): activating');
-  let telemetry;
+  let telemetry: RuntimeEnvironment['telemetry'];
   try {
     telemetry = await (await getRedHatService(context)).getTelemetryService();
   } catch (e) {

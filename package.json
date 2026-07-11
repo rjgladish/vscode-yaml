@@ -39,6 +39,8 @@
     "virtualWorkspaces": true
   },
   "activationEvents": [
+    "onLanguage:yaml",
+    "onLanguage:linkml",
     "onLanguage:dockercompose",
     "onLanguage:github-actions-workflow",
     "onLanguage:yaml-textmate",
@@ -99,36 +101,6 @@
         "language": "linkml",
         "scopeName": "source.yaml.linkml",
         "path": "./dialect/linkml/syntaxes/linkml.tmLanguage.json"
-      }
-    ],
-    "viewsContainers": {
-      "sidebar": [
-        {
-          "id": "gemini-code-assist",
-          "title": "Gemini Code Assist",
-          "icon": "icon/icon128.png"
-        }
-      ]
-    },
-    "views": {
-      "gemini-code-assist": [
-        {
-          "id": "google.code.assist.welcome",
-          "name": "Google Code Assist",
-          "when": "google.code.assist.showWelcome"
-        }
-      ]
-    },
-    "viewsWelcome": [
-      {
-        "view": "google.code.assist.welcome",
-        "contents": "Welcome to Google Code Assist. [Learn more](https://cloud.google.com/code/docs/vscode/code-assist)."
-      }
-    ],
-    "commands": [
-      {
-        "command": "google.code.assist.welcome",
-        "title": "Google Code Assist: Welcome"
       }
     ],
     "configuration": {
@@ -282,7 +254,7 @@
         },
         "yaml.extension.recommendations": {
           "type": "boolean",
-          "default": "true",
+          "default": true,
           "description": "Suggest additional extensions based on YAML usage."
         },
         "yaml.dialect.linkml": {
@@ -307,21 +279,20 @@
   },
   "extensionDependencies": [],
   "scripts": {
-    "build": "npm run clean && npm run lint && npm run fetch-schemas && npm run vscode:prepublish",
+    "build": "npm run clean && npm run lint && npm run vscode:prepublish",
     "check-dependencies": "node ./scripts/check-dependencies.js",
-    "clean": "rimraf out && rimraf dist && rimraf dialect/linkml/schemas/linkml-meta.schema.json",
-    "compile": "npm run fetch-schemas && webpack --mode none",
-    "fetch-schemas": "mkdir -p dialect/linkml/schemas && curl -L -o dialect/linkml/schemas/linkml-meta.schema.json https://w3id.org/linkml/meta.schema.json",
+    "clean": "rimraf out && rimraf dist",
+    "compile": "webpack --mode none",
     "format": "prettier --write .",
     "lint": "eslint -c .eslintrc.js --ext .ts src test",
     "test": "npm run test-compile && sh scripts/e2e.sh",
     "ui-test": "npm run test-compile && extest setup-and-run out/test/ui-test/allTestsSuite.js -c 1.76.2",
-    "vscode:prepublish": "npm run fetch-schemas && webpack --mode production && npm run copy-l10n",
+    "vscode:prepublish": "webpack --mode production && npm run copy-l10n",
     "copy-l10n": "cp -r node_modules/yaml-language-server/l10n dist/l10n",
-    "watch": "npm run fetch-schemas && webpack --mode development --watch --info-verbosity verbose",
-    "test-compile": "npm run clean && npm run fetch-schemas && tsc -p ./ && webpack --mode development && npm run copy-l10n",
+    "watch": "webpack --mode development --watch --info-verbosity verbose",
+    "test-compile": "npm run clean && tsc -p ./ && webpack --mode development && npm run copy-l10n",
     "run-in-chromium": "npm run compile && vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
-    "vsix": "npm version patch --no-git-tag-version && npx @vscode/vsce package"
+    "vsix": "npx @vscode/vsce package"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
@@ -368,6 +339,6 @@
     "vscode-nls": "^3.2.1",
     "vscode-uri": "^2.0.3",
     "whatwg-fetch": "^3.6.2",
-    "yaml-language-server": "next"
+    "yaml-language-server": "^1.24.0"
   }
 }

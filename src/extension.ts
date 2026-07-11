@@ -89,6 +89,8 @@ export namespace SchemaSelectionRequests {
 let client: CommonLanguageClient;
 
 const lsName = 'YAML Support';
+const linkMLSchemaUri = 'linkml://schema/meta';
+const linkMLSchemaAssetPath = 'schemas/linkml-meta.schema.json';
 
 export type LanguageClientConstructor = (
   name: string,
@@ -106,13 +108,29 @@ export interface TelemetryService {
   sendStartupEvent(): Promise<void>;
 }
 
+export function isLinkMLSchemaText(text: string): boolean {
+  return hasLinkMLIdSignature(text) && /^\s*(classes|slots|enums|types):/m.test(text);
+}
+
+function hasLinkMLIdSignature(text: string): boolean {
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '' || trimmed.startsWith('#') || trimmed === '---') {
+      continue;
+    }
+    const match = line.match(/^([a-zA-Z0-9_\-.]+):/);
+    return match?.[1] === 'id';
+  }
+  return false;
+}
+
 export function startClient(
   context: ExtensionContext,
   newLanguageClient: LanguageClientConstructor,
   runtime: RuntimeEnvironment
 ): SchemaExtensionAPI {
   const telemetryErrorHandler = new TelemetryErrorHandler(runtime.telemetry, lsName, 4);
-  console.log('YAML Extension: startClient called');
   const outputChannel = window.createOutputChannel(lsName);
   const l10nPath = context.asAbsolutePath('./dist/l10n');
   // Options to control the language client
@@ -227,9 +245,8 @@ export function startClient(
       const config = workspace.getConfiguration('yaml');
       const dialectLinkML = !!config.get('dialect.linkml');
 
-      const linkMLSchemaUri = Uri.file(context.asAbsolutePath('dialect/linkml/schemas/linkml-meta.schema.json')).toString();
-      const linkMLRequestContent = async (uri: string): Promise<string> => {
-        const content = await workspace.fs.readFile(Uri.parse(uri));
+      const linkMLRequestContent = async (): Promise<string> => {
+        const content = await workspace.fs.readFile(Uri.file(context.asAbsolutePath(linkMLSchemaAssetPath)));
         return new TextDecoder().decode(content);
       };
 
@@ -237,51 +254,20 @@ export function startClient(
         const document = workspace.textDocuments.find((d) => d.uri.toString() === uri);
         if (document) {
           const text = document.getText();
-          // Precision detection: Find the first significant root-level key
-          const lines = text.split('\n');
-          let firstKey = '';
-          for (const line of lines) {
-            const trimmed = line.trim();
-            // Skip comments, blanks, and document separators
-            if (trimmed === '' || trimmed.startsWith('#') || trimmed === '---') {
-              continue;
-            }
-            // Check if this line is a root-level key (starts with a key name, not a list item)
-            const match = line.match(/^(\s*)([a-zA-Z0-9_\-.]+):/);
-            if (match) {
-              const keyName = match[2];
-              // Only consider it a schema if 'id:' is the first root-level key found
-              // (Indentation is allowed as long as it's consistent for a root block)
-              if (keyName === 'id') {
-                firstKey = 'id';
-              } else {
-                firstKey = keyName;
-              }
-              break;
-            }
-            // If we hit a list item or something else first, it's not a schema
-            if (trimmed.startsWith('-')) {
-              break;
-            }
-          }
-
-          const isLinkMLSignature = firstKey === 'id';
-          const hasDefinitions = /^classes:|^slots:|^enums:|^types:/m.test(text);
-
-          if (isLinkMLSignature) {
+          if (hasLinkMLIdSignature(text)) {
             if (!dialectLinkML) {
               const showReminder = 'LinkML detected. Enable dialect and strict validation for better support?';
               const enableAction = 'Enable LinkML Support';
               window.showInformationMessage(showReminder, enableAction).then((selection) => {
                 if (selection === enableAction) {
-                  config.update('dialect.linkml', true, ConfigurationTarget.Global);
-                  config.update('disableAdditionalProperties', true, ConfigurationTarget.Global);
+                  config.update('dialect.linkml', true, ConfigurationTarget.Workspace);
+                  config.update('disableAdditionalProperties', true, ConfigurationTarget.Workspace);
                 }
               });
             }
           }
 
-          if (dialectLinkML && isLinkMLSignature && hasDefinitions) {
+          if (dialectLinkML && isLinkMLSchemaText(text)) {
             logToExtensionOutputChannel(`LinkML Dialect: Detected LinkML schema for ${uri}`);
             return linkMLSchemaUri;
           }
