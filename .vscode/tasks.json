@@ -6,18 +6,12 @@
     // A task runner that calls a custom npm script that compiles the extension.
     {
       "label": "compile typescript",
-      // the command is a shell script
       "type": "shell",
-      // we run the custom npm script "compile" as defined in package.json
       "command": "npm run compile",
-      // show the output window only if unrecognized errors occur.
       "presentation": {
-        "reveal": "never"
+        "reveal": "always"
       },
-      // The tsc compiler is started in watching mode
-      "isBackground": true,
-      // use the standard tsc in watch mode problem matcher to find compile problems in the output.
-      "problemMatcher": "$tsc-watch"
+      "problemMatcher": "$tsc"
     },
     {
       "label": "compile webpack",

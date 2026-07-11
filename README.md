@@ -260,11 +260,30 @@ yaml.schemas: {
 
 `yaml.schemas` allows you to specify JSON schemas that you want to validate against the YAML you write. *Kubernetes* is a reserved keyword field. It does not require a URL, as the language server will provide that. You need the keyword `kubernetes` and a glob pattern.
 
+### Specialized Dialects
+
+This extension supports specialized YAML dialects with custom syntax highlighting and schema validation.
+
+#### LinkML
+
+Files starting with `id:` followed by a URI or identifier are automatically detected as [LinkML](https://linkml.io/) schemas.
+
+See [dialect/linkml/README.md](dialect/linkml/README.md) for installation and configuration instructions:
+
+- Installing a local VSIX with the VS Code CLI
+- Automatic detection patterns
+- Enabling schema validation
+- Manual file associations
+
+---
+
 ### Mapping a schema in an extension
 
-- Supports `yamlValidation` point, which allows you to contribute a schema for a specific type of YAML file (Similar to [jsonValidation](https://code.visualstudio.com/docs/extensionAPI/extension-points#_contributesjsonvalidation))
-e.g.
-```JSON
+If you are developing a VS Code extension and want to contribute a schema for a specific type of YAML file, add the `yamlValidation` extension point to your **extension's `package.json`** (similar to [jsonValidation](https://code.visualstudio.com/docs/extensionAPI/extension-points#_contributesjsonvalidation)).
+
+Example:
+
+```json
 {
   "contributes": {
     "yamlValidation": [

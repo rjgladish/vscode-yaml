@@ -1,12 +1,18 @@
 .vscode/**
+.planning/**
+.vscode-test*.mjs
+AGENT.MD
+LEARNINGS_DIALECT_INTEGRATION.md
 typings/**
 out/**
 test/**
+smoke-test/**
 src/**
 images/**
 node_modules/**
 scripts/**
 build/**
+lkml-langserver/**
 Jenkinsfile
 prettier*
 **/*.map
@@ -24,3 +30,4 @@ test-resources
 !node_modules/prettier/index.js
 !node_modules/prettier/third-party.js
 !node_modules/prettier/parser-yaml.js
+

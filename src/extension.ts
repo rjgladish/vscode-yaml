@@ -6,7 +6,7 @@
  *--------------------------------------------------------------------------------------------*/
 'use strict';
 
-import { workspace, ExtensionContext, extensions, window, commands, Uri } from 'vscode';
+import { workspace, ExtensionContext, extensions, window, commands, Uri, ConfigurationTarget } from 'vscode';
 import {
   CommonLanguageClient,
   LanguageClientOptions,
@@ -90,6 +90,8 @@ export namespace SchemaSelectionRequests {
 let client: CommonLanguageClient;
 
 const lsName = 'YAML Support';
+const linkMLSchemaUri = 'linkml://schema/meta';
+const linkMLSchemaAssetPath = 'schemas/linkml-meta.schema.json';
 
 export type LanguageClientConstructor = (
   name: string,
@@ -105,6 +107,23 @@ export interface RuntimeEnvironment {
 export interface TelemetryService {
   send(arg: { name: string; properties?: unknown }): Promise<void>;
   sendStartupEvent(): Promise<void>;
+}
+
+export function isLinkMLSchemaText(text: string): boolean {
+  return hasLinkMLIdSignature(text) && /^\s*(classes|slots|enums|types):/m.test(text);
+}
+
+function hasLinkMLIdSignature(text: string): boolean {
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '' || trimmed.startsWith('#') || trimmed === '---') {
+      continue;
+    }
+    const match = line.match(/^([a-zA-Z0-9_\-.]+):/);
+    return match?.[1] === 'id';
+  }
+  return false;
 }
 
 export function startClient(
@@ -123,12 +142,15 @@ export function startClient(
       { language: 'yaml-textmate' },
       { language: 'yaml-tmlanguage' },
       { language: 'ansible' },
+      { language: 'ansible-jinja' },
+      { language: 'linkml' },
       { language: 'azure-pipelines' },
       { language: 'dockercompose' },
       { language: 'github-actions-workflow' },
       { language: 'home-assistant' },
       { language: 'manifest-yaml' },
       { language: 'spring-boot-properties-yaml' },
+      { pattern: '**/*.{yaml,yml}' },
     ],
     synchronize: {
       // Notify the server about file changes to YAML and JSON files contained in the workspace
@@ -239,8 +261,52 @@ export function startClient(
       client.onNotification(SchemaSelectionRequests.schemaStoreInitialized, () => {
         createJSONSchemaStatusBarItem(context, client);
       });
-
       initializeRecommendation(context);
+
+      const config = workspace.getConfiguration('yaml');
+      const dialectLinkML = !!config.get('dialect.linkml');
+
+      const linkMLRequestContent = async (): Promise<string> => {
+        const content = await workspace.fs.readFile(Uri.file(context.asAbsolutePath(linkMLSchemaAssetPath)));
+        return new TextDecoder().decode(content);
+      };
+
+      const linkMLCheckTrigger = (uri: string): string | undefined => {
+        const document = workspace.textDocuments.find((d) => d.uri.toString() === uri);
+        if (document) {
+          const text = document.getText();
+          if (hasLinkMLIdSignature(text)) {
+            if (!dialectLinkML) {
+              const showReminder = 'LinkML detected. Enable dialect and strict validation for better support?';
+              const enableAction = 'Enable LinkML Support';
+              window.showInformationMessage(showReminder, enableAction).then((selection) => {
+                if (selection === enableAction) {
+                  config.update('dialect.linkml', true, ConfigurationTarget.Workspace);
+                  config.update('disableAdditionalProperties', true, ConfigurationTarget.Workspace);
+                }
+              });
+            }
+          }
+
+          if (dialectLinkML && isLinkMLSchemaText(text)) {
+            logToExtensionOutputChannel(`LinkML Dialect: Detected LinkML schema for ${uri}`);
+            return linkMLSchemaUri;
+          }
+        }
+        return undefined;
+      };
+
+      if (dialectLinkML) {
+        // Register automatic trigger
+        schemaExtensionAPI.registerContributor('linkml-auto', linkMLCheckTrigger, linkMLRequestContent);
+      } else {
+        // Still register a passive trigger to detect and suggest enabling
+        workspace.onDidOpenTextDocument((doc) => {
+          if (doc.languageId === 'yaml' || doc.languageId === 'linkml') {
+            linkMLCheckTrigger(doc.uri.toString());
+          }
+        });
+      }
     })
     .catch((err) => {
       sendStartupTelemetryEvent(runtime.telemetry, false, err);

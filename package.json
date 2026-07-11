@@ -25,7 +25,7 @@
   "icon": "icon/icon128.png",
   "engines": {
     "npm": ">=7.0.0",
-    "vscode": "^1.63.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Programming Languages",
@@ -41,9 +41,11 @@
   },
   "activationEvents": [
     "onLanguage:yaml",
+    "onLanguage:linkml",
     "onLanguage:yaml-textmate",
     "onLanguage:yaml-tmlanguage",
     "onLanguage:ansible",
+    "onLanguage:ansible-jinja",
     "onLanguage:azure-pipelines",
     "onLanguage:dockercompose",
     "onLanguage:github-actions-workflow",
@@ -80,6 +82,18 @@
         ],
         "firstLine": "^#cloud-config",
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "linkml",
+        "aliases": [
+          "LinkML"
+        ],
+        "extensions": [
+          ".yaml",
+          ".yml"
+        ],
+        "firstLine": "^(\\s*id:\\s+|---\\s*\\n\\s*id:\\s+)(https?:\\/\\/\\S+|[a-zA-Z_][a-zA-Z0-9_\\-\\.]*)",
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -87,10 +101,15 @@
         "language": "yaml",
         "scopeName": "source.yaml",
         "path": "./syntaxes/yaml.tmLanguage.json"
+      },
+      {
+        "language": "linkml",
+        "scopeName": "source.yaml.linkml",
+        "path": "./dialect/linkml/syntaxes/linkml.tmLanguage.json"
       }
     ],
     "configuration": {
-      "title:": "YAML",
+      "title": "YAML",
       "properties": {
         "redhat.telemetry.enabled": {
           "type": "boolean",
@@ -225,7 +244,7 @@
         "yaml.disableAdditionalProperties": {
           "type": "boolean",
           "default": false,
-          "description": "Globally set additionalProperties to false for all objects. So if its true, no extra properties are allowed inside yaml."
+          "markdownDescription": "Globally set additionalProperties to false for all objects. **Note: It is highly recommended to enable this when using the LinkML dialect to ensure strict validation of your models.**"
         },
         "yaml.disableDefaultProperties": {
           "type": "boolean",
@@ -263,12 +282,17 @@
         "yaml.keyOrdering": {
           "type": "boolean",
           "default": false,
-          "description": "Enforces alphabetical ordering of keys in mappings when set to true"
+          "markdownDescription": "Enforces alphabetical ordering of keys in mappings when set to true. **Note: For LinkML, it is recommended to keep this `false` if your `id:` property is expected to stay at the top of the file for automatic detection.**"
         },
         "yaml.extension.recommendations": {
           "type": "boolean",
           "default": true,
           "description": "Suggest additional extensions based on YAML usage."
+        },
+        "yaml.dialect.linkml": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable LinkML dialect support (syntax highlighting and schema validation). **Note: Dialect is disabled by default. If enabled, it is also recommended to set `yaml.disableAdditionalProperties` to `true`.**"
         },
         "yaml.hoverSchemaSource": {
           "type": "boolean",
@@ -307,7 +331,8 @@
     "smoke-test": "npm run test-compile && vscode-test --config .vscode-test.smoketest.mjs",
     "compile-smoke-test-web": "webpack --config smoke-test/webpack.config",
     "smoke-test-web": "npm run compile-smoke-test-web && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=./out/smoke-test/smoke-test-runner.js ./smoke-test",
-    "run-in-chromium": "npm run compile && vscode-test-web --browserType=chromium --extensionDevelopmentPath=. smoke-test"
+    "run-in-chromium": "npm run compile && vscode-test-web --browserType=chromium --extensionDevelopmentPath=. smoke-test",
+    "vsix": "npx @vscode/vsce package"
   },
   "devDependencies": {
     "@types/chai": "^4.2.12",
@@ -356,6 +381,6 @@
     "vscode-nls": "^3.2.1",
     "vscode-uri": "^2.0.3",
     "whatwg-fetch": "^3.6.2",
-    "yaml-language-server": "next"
+    "yaml-language-server": "^1.24.0"
   }
 }

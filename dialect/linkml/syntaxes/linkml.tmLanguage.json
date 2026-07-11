@@ -1,0 +1,29 @@
+{
+  "name": "LinkML",
+  "scopeName": "source.yaml.linkml",
+  "fileTypes": [
+    "linkml.yaml"
+  ],
+  "patterns": [
+    {
+      "include": "#linkml-keywords"
+    },
+    {
+      "include": "source.yaml"
+    }
+  ],
+  "repository": {
+    "linkml-keywords": {
+      "patterns": [
+        {
+          "match": "\\b(classes|slots|types|enums|subsets|prefixes|imports|name|id|description|default_prefix|default_range|metamodel_version|comments|notes|examples|in_subset)\\b(?=\\s*:)",
+          "name": "keyword.other.linkml"
+        },
+        {
+          "match": "\\b(is_a|abstract|mixin|attributes|multivalued|required|range|identifier|any_of|exactly_one_of|none_of|all_of|slots|slot_usage|attributes|collections|extends|instantiates|is_direct|mixins|overrides|punning|represented_as|specialization_of|union_of|vocabulary|minimum_value|maximum_value|pattern|typeof|alias|aliases|identifier|key)\\b(?=\\s*:)",
+          "name": "storage.modifier.linkml"
+        }
+      ]
+    }
+  }
+}

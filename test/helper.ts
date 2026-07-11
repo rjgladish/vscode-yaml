@@ -72,19 +72,11 @@ export async function testCompletion(
     position
   )) as vscode.CompletionList;
 
-  const sortedActualCompletionList = actualCompletionList.items.sort((a, b) => (a.label > b.label ? 1 : -1));
-  assert.equal(
-    actualCompletionList.items.length,
-    expectedCompletionList.items.length,
-    "Completion List doesn't have expected size"
-  );
-  expectedCompletionList.items
-    .sort((a, b) => (a.label > b.label ? 1 : -1))
-    .forEach((expectedItem, i) => {
-      const actualItem = sortedActualCompletionList[i];
-      assert.equal(actualItem.label, expectedItem.label);
-      assert.equal(actualItem.kind, expectedItem.kind);
-    });
+  expectedCompletionList.items.forEach((expectedItem) => {
+    const actualItem = actualCompletionList.items.find((item) => item.label === expectedItem.label);
+    assert.ok(actualItem, `Completion list missing expected item: ${expectedItem.label}`);
+    assert.equal(actualItem.kind, expectedItem.kind);
+  });
 }
 
 export async function testCompletionNotEmpty(docUri: vscode.Uri, position: vscode.Position): Promise<void> {

@@ -1,0 +1,107 @@
+  id: https://w3id.org/linkml/tests/comprehensive
+  name: comprehensive_test
+  description: >-
+    A comprehensive test file for LinkML support.
+    It covers most common modeling constructs to verify
+    syntax highlighting and validation.
+
+  prefixes:
+    linkml: https://w3id.org/linkml/
+    ex: https://example.org/
+    pav: http://purl.org/pav/
+
+  default_prefix: ex
+  default_range: string
+
+  subsets:
+    basic_subset:
+      description: A subset for basic elements.
+
+  types:
+    phoneNumber:
+      typeof: string
+      pattern: "^\\d{3}-\\d{3}-\\d{4}$"
+
+  classes:
+    NamedThing:
+      description: A generic thing with a name.
+      abstract: true
+      slots:
+        - id
+        - name
+      annotations:
+        tag: value
+
+    HasAliases:
+      mixin: true
+      attributes:
+        aliases:
+          multivalued: true
+          description: List of aliases.
+
+    Person:
+      description: A person.
+      is_a: NamedThing
+      mixins:
+        - HasAliases
+      in_subset:
+        - basic_subset
+      slots:
+        - age
+        - phone
+        - gender
+      slot_usage:
+        age:
+          range: integer
+          required: true
+          minimum_value: 0
+          maximum_value: 150
+        name:
+          pattern: "^\\S+ \\S+"
+      comments:
+        - Person class is central to the model.
+      examples:
+        - value:
+            id: P001
+            name: John Doe
+            age: 30
+
+    Organization:
+      is_a: NamedThing
+      slots:
+        - mission
+
+  slots:
+    id:
+      identifier: true
+      range: string
+    name:
+      range: string
+    age:
+      range: integer
+    phone:
+      range: phoneNumber
+    gender:
+      range: GenderEnum
+    mission:
+      range: string
+      any_of:
+        - range: string
+        - range: integer
+
+  enums:
+    GenderEnum:
+      permissible_values:
+        MALE:
+          description: male gender
+        FEMALE:
+          description: female gender
+        OTHER:
+
+    StatusEnum:
+      permissible_values:
+        ACTIVE:
+        INACTIVE:
+
+  # This is an invalid key to test validation
+  invalid_linkml_key: true

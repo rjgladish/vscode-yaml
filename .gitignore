@@ -9,3 +9,6 @@ test/testFixture/.vscode
 test-resources/
 yarn.lock
 .yarnrc
+
+run-test-log.txt
+test/testFixture/linkml/deprecated

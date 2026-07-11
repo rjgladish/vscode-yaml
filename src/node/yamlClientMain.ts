@@ -14,8 +14,19 @@ import { JSONSchemaCache } from '../json-schema-cache';
 
 // this method is called when vs code is activated
 export async function activate(context: ExtensionContext): Promise<SchemaExtensionAPI> {
-  // Create Telemetry Service
-  const telemetry = await (await getRedHatService(context)).getTelemetryService();
+  let telemetry: RuntimeEnvironment['telemetry'];
+  try {
+    telemetry = await (await getRedHatService(context)).getTelemetryService();
+  } catch (e) {
+    console.error('Failed to initialize telemetry:', e);
+  }
+
+  if (!telemetry) {
+    telemetry = {
+      send: () => Promise.resolve(),
+      sendStartupEvent: () => Promise.resolve(),
+    };
+  }
 
   let serverModule: string;
   if (startedFromSources()) {

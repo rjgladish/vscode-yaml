@@ -145,6 +145,10 @@ describe('Tests for schema provider feature', () => {
 
   it('Multiple contributors with one throwing an error', async () => {
     const client = await activate(docUri);
+    await vscode.workspace.getConfiguration('yaml').update('schemaStore.enable', false, vscode.ConfigurationTarget.Workspace);
+    await vscode.workspace
+      .getConfiguration('yaml')
+      .update('disableAdditionalProperties', true, vscode.ConfigurationTarget.Workspace);
     client._customSchemaContributors = {};
     client.registerContributor(SCHEMA2, onRequestSchema2URI, onRequestSchema2Content);
     client.registerContributor('schemathrowingerror', onRequestSchemaURIThrowError, onRequestSchemaContentThrowError);
