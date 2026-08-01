@@ -266,14 +266,13 @@ This extension supports specialized YAML dialects with custom syntax highlightin
 
 #### LinkML
 
-Files starting with `id:` followed by a URI or identifier are automatically detected as [LinkML](https://linkml.io/) schemas.
+Likely [LinkML](https://linkml.io/) schemas can be detected automatically and validated against the bundled LinkML metamodel schema when dialect support is enabled.
 
-See [dialect/linkml/README.md](dialect/linkml/README.md) for installation and configuration instructions:
+See the [LinkML authoring setup guide](dialect/linkml/README.md) for:
 
-- Installing a local VSIX with the VS Code CLI
-- Automatic detection patterns
-- Enabling schema validation
-- Manual file associations
+- VS Code and compatible VS Code-based editor setup
+- automatic detection, file associations, and schema mappings
+- compatibility-oriented workflows for marimo, Jupyter, Google Colab, and JetBrains IDEs
 
 ---
 
