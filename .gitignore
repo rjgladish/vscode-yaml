@@ -12,3 +12,7 @@ yarn.lock
 
 run-test-log.txt
 test/testFixture/linkml/deprecated
+.planning/patterns/
+.mcp.json
+.bg-shell
+.gsd-id
